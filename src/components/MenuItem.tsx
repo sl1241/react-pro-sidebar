@@ -1,15 +1,10 @@
-import React from 'react';
-import styled, { CSSObject } from '@emotion/styled';
 import classnames from 'classnames';
-import { StyledMenuLabel } from '../styles/StyledMenuLabel';
-import { StyledMenuIcon } from '../styles/StyledMenuIcon';
-import { StyledMenuPrefix } from '../styles/StyledMenuPrefix';
 import { useMenu } from '../hooks/useMenu';
-import { StyledMenuSuffix } from '../styles/StyledMenuSuffix';
 import { menuClasses } from '../utils/utilityClasses';
-import { MenuButton, menuButtonStyles } from './MenuButton';
+import { MenuButton } from './MenuButton';
 import { LevelContext } from './Menu';
 import { SidebarContext } from './Sidebar';
+import { useContext } from 'voby';
 
 export interface MenuItemProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
@@ -53,39 +48,39 @@ export interface MenuItemProps
   children?: React.ReactNode;
 }
 
-interface StyledMenuItemProps extends Pick<MenuItemProps, 'rootStyles' | 'active' | 'disabled'> {
-  level: number;
-  menuItemStyles?: CSSObject;
-  collapsed?: boolean;
-  rtl?: boolean;
-  buttonStyles?: CSSObject;
-}
+// interface StyledMenuItemProps extends Pick<MenuItemProps, 'rootStyles' | 'active' | 'disabled'> {
+//   level: number;
+//   menuItemStyles?: CSSObject;
+//   collapsed?: boolean;
+//   rtl?: boolean;
+//   buttonStyles?: CSSObject;
+// }
 
 type MenuItemElement = 'root' | 'button' | 'label' | 'prefix' | 'suffix' | 'icon';
 
-const StyledMenuItem = styled.li<StyledMenuItemProps>`
-  width: 100%;
-  position: relative;
+// const StyledMenuItem = styled.li<StyledMenuItemProps>`
+//   width: 100%;
+//   position: relative;
 
-  ${({ menuItemStyles }) => menuItemStyles};
+//   ${({ menuItemStyles }) => menuItemStyles};
 
-  ${({ rootStyles }) => rootStyles};
+//   ${({ rootStyles }) => rootStyles};
 
-  > .${menuClasses.button} {
-    ${({ level, disabled, active, collapsed, rtl }) =>
-      menuButtonStyles({
-        level,
-        disabled,
-        active,
-        collapsed,
-        rtl,
-      })};
+//   [&_.ps-menu-button]> .${menuClasses.button} {
+//     ${({ level, disabled, active, collapsed, rtl }) =>
+//       menuButtonStyles({
+//         level,
+//         disabled,
+//         active,
+//         collapsed,
+//         rtl,
+//       })};
 
-    ${({ buttonStyles }) => buttonStyles};
-  }
-`;
+//     ${({ buttonStyles }) => buttonStyles};
+//   }
+// `;
 
-export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemProps> = (
+export const MenuItemFR = (
   {
     children,
     icon,
@@ -96,14 +91,13 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
     disabled = false,
     component,
     rootStyles,
+    ref,
     ...rest
-  },
-  ref,
+  }: MenuItemProps,
 ) => {
-  const level = React.useContext(LevelContext);
-  const { collapsed, rtl, transitionDuration } = React.useContext(SidebarContext);
+  const level = useContext(LevelContext);
+  const { collapsed, rtl, transitionDuration } = useContext(SidebarContext);
   const { menuItemStyles } = useMenu();
-
   const getMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
     if (menuItemStyles) {
       const params = { level, disabled, active, isSubmenu: false };
@@ -147,17 +141,35 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
   };
 
   return (
-    <StyledMenuItem
+    <li
       ref={ref}
-      className={classnames(menuClasses.menuItemRoot, sharedClasses, className)}
-      menuItemStyles={getMenuItemStyles('root')}
-      level={level}
-      collapsed={collapsed}
-      rtl={rtl}
+      style={{
+        paddingLeft: rtl ? "20px" : `${level === 0 ? 20 : (collapsed ? level : level + 1) * 20}px`,
+        paddingRight: rtl ? ` ${level === 0 ? 20 : (collapsed ? level : level + 1) * 20}px` : "20px"
+      }}
+      className={[
+        menuClasses.menuItemRoot,
+        sharedClasses,
+        className,
+        getMenuItemStyles('root'),
+        getMenuItemStyles("button"),
+        rootStyles,
+        `w-full relative
+        [&_.ps-menu-button]>:    
+        flex 
+        items-center 
+        h-[50px] 
+        no-underline
+        text-inherit
+        box-border
+        cursor-pointer
+        hover:bg-[#f3f3f3]
+        ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""}
+        ${active ? 'background-color: #e2eef9' : ""}
+
+        `
+      ]}
       disabled={disabled}
-      active={active}
-      buttonStyles={getMenuItemStyles('button')}
-      rootStyles={rootStyles}
     >
       <MenuButton
         className={classnames(menuClasses.button, sharedClasses)}
@@ -167,49 +179,88 @@ export const MenuItemFR: React.ForwardRefRenderFunction<HTMLLIElement, MenuItemP
         {...rest}
       >
         {icon && (
-          <StyledMenuIcon
-            rtl={rtl}
-            className={classnames(menuClasses.icon, sharedClasses)}
-            rootStyles={getMenuItemStyles('icon')}
+          <span
+            style={{
+              marginLeft: rtl ? "10px" : "",
+              marginRight: rtl ? "" : "10px"
+            }}
+            className={[
+              menuClasses.icon,
+              sharedClasses,
+              getMenuItemStyles('icon')
+                `w-[35px]
+              min-w-[35px]
+              h-[35px]
+              leading-[35px]
+              text-center
+              rounded-[2px]
+              flex
+              items-center
+              justify-center
+              `
+            ]}
           >
             {icon}
-          </StyledMenuIcon>
+          </span>
         )}
 
         {prefix && (
-          <StyledMenuPrefix
-            collapsed={collapsed}
-            transitionDuration={transitionDuration}
-            firstLevel={level === 0}
-            className={classnames(menuClasses.prefix, sharedClasses)}
-            rtl={rtl}
-            rootStyles={getMenuItemStyles('prefix')}
+          <span
+            style={{
+              marginLeft: rtl ? "5px" : "",
+              marginRight: rtl ? "" : "5px",
+              opacity: (level === 0 && collapsed) ? '0' : '1',
+              transition: `opacity  ${transitionDuration}ms`
+            }}
+            className={[
+              menuClasses.prefix,
+              sharedClasses,
+              getMenuItemStyles('prefix')
+            ]}
+
           >
             {prefix}
-          </StyledMenuPrefix>
+          </span>
         )}
 
-        <StyledMenuLabel
-          className={classnames(menuClasses.label, sharedClasses)}
-          rootStyles={getMenuItemStyles('label')}
+        <span
+          className={[
+            menuClasses.label,
+            sharedClasses,
+            getMenuItemStyles('label'),
+            `grow
+            overflow-hidden
+            text-ellipsis	
+            whitespace-nowrap	
+            `
+          ]}
         >
           {children}
-        </StyledMenuLabel>
+        </span>
 
         {suffix && (
-          <StyledMenuSuffix
-            collapsed={collapsed}
-            transitionDuration={transitionDuration}
-            firstLevel={level === 0}
-            className={classnames(menuClasses.suffix, sharedClasses)}
-            rootStyles={getMenuItemStyles('suffix')}
+          <span
+            style={{
+              opacity: (level === 0 && collapsed) ? '0' : '1',
+              transition: `opacity  ${transitionDuration}ms`
+
+            }}
+            className={[
+              menuClasses.suffix,
+              sharedClasses,
+              getMenuItemStyles('suffix'),
+              `mr-[5px]
+              ml-[5px]
+              `
+
+            ]}
           >
             {suffix}
-          </StyledMenuSuffix>
+          </span>
         )}
       </MenuButton>
-    </StyledMenuItem>
+    </li>
   );
 };
 
-export const MenuItem = React.forwardRef<HTMLLIElement, MenuItemProps>(MenuItemFR);
+export const MenuItem = (MenuItemFR);

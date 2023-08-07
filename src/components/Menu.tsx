@@ -1,7 +1,4 @@
-import React from 'react';
-import classnames from 'classnames';
-import { StyledUl } from '../styles/StyledUl';
-import styled, { CSSObject } from '@emotion/styled';
+import { createContext, useMemo } from 'voby';
 import { menuClasses } from '../utils/utilityClasses';
 
 export interface MenuItemStylesParams {
@@ -62,17 +59,17 @@ export interface MenuProps extends MenuContextProps, React.MenuHTMLAttributes<HT
   children?: React.ReactNode;
 }
 
-const StyledMenu = styled.nav<Pick<MenuProps, 'rootStyles'>>`
-  &.${menuClasses.root} {
-    ${({ rootStyles }) => rootStyles}
-  }
-`;
+// const StyledMenu = styled.nav<Pick<MenuProps, 'rootStyles'>>`
+//   &.${menuClasses.root} {
+//     ${({ rootStyles }) => rootStyles}
+//   }
+// `;
 
-export const MenuContext = React.createContext<MenuContextProps | undefined>(undefined);
+export const MenuContext = createContext<MenuContextProps | undefined>(undefined);
 
-export const LevelContext = React.createContext<number>(0);
+export const LevelContext = createContext<number>(0);
 
-const MenuFR: React.ForwardRefRenderFunction<HTMLMenuElement, MenuProps> = (
+const MenuFR = (
   {
     children,
     className,
@@ -81,29 +78,26 @@ const MenuFR: React.ForwardRefRenderFunction<HTMLMenuElement, MenuProps> = (
     rootStyles,
     menuItemStyles,
     renderExpandIcon,
+    ref,
     ...rest
-  },
-  ref,
+  } : MenuProps,
 ) => {
-  const providerValue = React.useMemo(
-    () => ({ transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon }),
-    [transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon],
-  );
+  
+  const providerValue = useMemo(() => ({ transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon }));
 
   return (
     <MenuContext.Provider value={providerValue}>
       <LevelContext.Provider value={0}>
-        <StyledMenu
+        <nav
           ref={ref}
-          className={classnames(menuClasses.root, className)}
-          rootStyles={rootStyles}
+          className={[menuClasses.root, className]}
           {...rest}
         >
-          <StyledUl>{children}</StyledUl>
-        </StyledMenu>
+          <ul class="list-none p-0 m-0">{children}</ul>
+        </nav>
       </LevelContext.Provider>
     </MenuContext.Provider>
   );
 };
 
-export const Menu = React.forwardRef<HTMLMenuElement, MenuProps>(MenuFR);
+export const Menu = (MenuFR);

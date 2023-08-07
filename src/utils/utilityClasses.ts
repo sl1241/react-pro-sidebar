@@ -1,11 +1,11 @@
 export const sidebarClasses = {
-  root: 'ps-sidebar-root',
-  container: 'ps-sidebar-container',
-  image: 'ps-sidebar-image',
-  backdrop: 'ps-sidebar-backdrop',
+  root: "relative border-r-2 border-gray-200",
+  container: "relative h-full overflow-y-auto overflow-x-hidden z-3",
+  image: "w-full h-full object-cover object-center absolute inset-0 z-2",
+  backdrop: "fixed top-0 right-0 bottom-0 left-0 z-10 bg-black bg-opacity-30",
   collapsed: 'ps-collapsed',
   toggled: 'ps-toggled',
-  rtl: 'ps-rtl',
+  rtl: '[direction-rtl] border-r-[none] border-l-[1px] [border-right-style:none] [border-left-style:solid] ',
   broken: 'ps-broken',
 };
 

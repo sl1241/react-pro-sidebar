@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import React from 'react';
+import { cloneElement, createElement } from 'voby';
 
 interface MenuButtonProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
   component?: string | React.ReactElement;
@@ -18,34 +18,29 @@ export const menuButtonStyles = (props: MenuButtonStylesProps) => {
   const { rtl, level, collapsed, disabled, active } = props;
 
   return `
-    display: flex;
-    align-items: center;
-    height: 50px;
-    text-decoration: none;
-    color: inherit;
-    box-sizing: border-box;
-    cursor: pointer;
+    flex 
+    items-center 
+    h-[50px] 
+    no-underline
+    text-inherit
+    box-border
+    cursor-pointer
 
-    ${
-      rtl
-        ? `padding-left: 20px;
+    ${rtl ? `pl-5
            padding-right: ${level === 0 ? 20 : (collapsed ? level : level + 1) * 20}px;
             `
-        : `padding-right: 20px;
+      : `pr-5
            padding-left: ${level === 0 ? 20 : (collapsed ? level : level + 1) * 20}px;
            `
     }
 
-    &:hover {
-      background-color: #f3f3f3;
-    }
+    hover:bg-[#f3f3f3]
 
-    ${
-      disabled &&
-      ` 
-      pointer-events: none;
-      cursor: default;
-      color:#adadad;
+    ${disabled &&
+    ` 
+      pointer-events-none
+      cursor-default
+      color-[#adadad]
         `
     }
 
@@ -54,13 +49,12 @@ export const menuButtonStyles = (props: MenuButtonStylesProps) => {
   `;
 };
 
-export const MenuButtonRef: React.ForwardRefRenderFunction<HTMLAnchorElement, MenuButtonProps> = (
-  { className, component, children, ...rest },
-  ref,
+export const MenuButtonRef = (
+  { className, component, children, ref, ...rest }: MenuButtonProps,
 ) => {
   if (component) {
     if (typeof component === 'string') {
-      return React.createElement(
+      return createElement(
         component,
         {
           className: classNames(className),
@@ -72,7 +66,7 @@ export const MenuButtonRef: React.ForwardRefRenderFunction<HTMLAnchorElement, Me
     } else {
       const { className: classNameProp, ...props } = component.props;
 
-      return React.cloneElement(
+      return cloneElement(
         component,
         {
           className: classNames(className, classNameProp),
@@ -92,4 +86,4 @@ export const MenuButtonRef: React.ForwardRefRenderFunction<HTMLAnchorElement, Me
   }
 };
 
-export const MenuButton = React.forwardRef<HTMLAnchorElement, MenuButtonProps>(MenuButtonRef);
+export const MenuButton = (MenuButtonRef);

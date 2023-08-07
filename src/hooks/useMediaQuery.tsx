@@ -1,17 +1,17 @@
-import React from 'react';
+import { $, Observable, useEffect } from "voby";
 
-export const useMediaQuery = (breakpoint?: string): boolean => {
-  const [matches, setMatches] = React.useState(
+export const useMediaQuery = (breakpoint?: string): Observable<boolean> => {
+  const matches = $(
     !!breakpoint && window.matchMedia(breakpoint).matches,
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (breakpoint) {
       const media = window.matchMedia(breakpoint);
 
       const handleMatch = () => {
-        if (media.matches !== matches) {
-          setMatches(media.matches);
+        if (media.matches !== matches()) {
+          $(media.matches);
         }
       };
 
@@ -20,7 +20,7 @@ export const useMediaQuery = (breakpoint?: string): boolean => {
       media.addEventListener('change', handleMatch);
       return () => media.removeEventListener('change', handleMatch);
     }
-  }, [matches, breakpoint]);
+  });
 
   return matches;
 };

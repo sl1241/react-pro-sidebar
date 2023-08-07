@@ -1,10 +1,8 @@
-import React from 'react';
-import styled, { CSSObject } from '@emotion/styled';
+import { createContext, useEffect, $, $$, useMemo, useContext } from 'voby';
 import classnames from 'classnames';
 import { useLegacySidebar } from '../hooks/useLegacySidebar';
 import { useMediaQuery } from '../hooks/useMediaQuery';
 import { sidebarClasses } from '../utils/utilityClasses';
-import { StyledBackdrop } from '../styles/StyledBackdrop';
 
 type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'always' | 'all';
 
@@ -19,7 +17,7 @@ const BREAK_POINTS = {
   all: 'all',
 };
 
-export interface SidebarProps extends React.HTMLAttributes<HTMLHtmlElement> {
+export interface SidebarProps extends HTMLAttributes<HTMLHtmlElement> {
   /**
    * sidebar collapsed status
    */
@@ -110,84 +108,63 @@ interface StyledSidebarProps extends Omit<SidebarProps, 'backgroundColor'> {
 
 type StyledSidebarContainerProps = Pick<SidebarProps, 'backgroundColor'>;
 
-const StyledSidebar = styled.aside<StyledSidebarProps>`
-  position: relative;
-  border-right-width: 1px;
-  border-right-style: solid;
-  border-color: #efefef;
+// const StyledSidebar = styled.aside<StyledSidebarProps>`
+//   position: relative;
+//   border-right-width: 1px;
+//   border-right-style: solid;
+//   border-color: #efefef;
 
-  transition: ${({ transitionDuration }) => `width, left, right, ${transitionDuration}ms`};
+//   transition: ${({ transitionDuration }) => `width, left, right, ${transitionDuration}ms`};
 
-  width: ${({ width }) => width};
-  min-width: ${({ width }) => width};
+//   width: ${({ width }) => width};
+//   min-width: ${({ width }) => width};
 
-  &.${sidebarClasses.collapsed} {
-    width: ${({ collapsedWidth }) => collapsedWidth};
-    min-width: ${({ collapsedWidth }) => collapsedWidth};
-  }
+// &.${sidebarClasses.collapsed} {
+// width: ${({ collapsedWidth }) => collapsedWidth};
+// min-width: ${({ collapsedWidth }) => collapsedWidth};
+// }
 
-  &.${sidebarClasses.rtl} {
-    direction: rtl;
-    border-right-width: none;
-    border-left-width: 1px;
-    border-right-style: none;
-    border-left-style: solid;
-  }
+//   &.${sidebarClasses.rtl} {
+//     direction: rtl;
+//     border-right-width: none;
+//     border-left-width: 1px;
+//     border-right-style: none;
+//     border-left-style: solid;
+//   }
 
-  &.${sidebarClasses.broken} {
-    position: fixed;
-    height: 100%;
-    top: 0px;
-    z-index: 100;
+// &.${sidebarClasses.broken} {
+//   position: fixed;
+//   height: 100%;
+//   top: 0px;
+//   z-index: 100;
 
-    ${({ rtl, width }) => (!rtl ? `left: -${width};` : '')}
+// ${({ rtl, width }) => (!rtl ? `left: -${width};` : '')}
 
-    &.${sidebarClasses.collapsed} {
-      ${({ rtl, collapsedWidth }) => (!rtl ? `left: -${collapsedWidth}; ` : '')}
-    }
+// &.${sidebarClasses.collapsed} {
+//   ${({ rtl, collapsedWidth }) => (!rtl ? `left: -${collapsedWidth}; ` : '')}
+// }
 
-    &.${sidebarClasses.toggled} {
-      ${({ rtl }) => (!rtl ? `left: 0;` : '')}
-    }
+// &.${sidebarClasses.toggled} {
+//   ${({ rtl }) => (!rtl ? `left: 0;` : '')}
+// }
 
-    &.${sidebarClasses.rtl} {
-      right: -${({ width }) => width};
+// &.${sidebarClasses.rtl} {
+//   right: -${({ width }) => width};
 
-      &.${sidebarClasses.collapsed} {
-        right: -${({ collapsedWidth }) => collapsedWidth};
-      }
+// &.${sidebarClasses.collapsed} {
+//   right: -${({ collapsedWidth }) => collapsedWidth};
+// }
 
-      &.${sidebarClasses.toggled} {
-        right: 0;
-      }
-    }
-  }
+//     &.${sidebarClasses.toggled} {
+//       right: 0;
+//     }
+//   }
+// }
 
-  ${({ rootStyles }) => rootStyles}
-`;
+// ${({ rootStyles }) => rootStyles}
+// `;
 
-const StyledSidebarContainer = styled.div<StyledSidebarContainerProps>`
-  position: relative;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 3;
 
-  ${({ backgroundColor }) => (backgroundColor ? `background-color:${backgroundColor};` : '')}
-`;
-
-const StyledSidebarImage = styled.img`
-  &.${sidebarClasses.image} {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    position: absolute;
-    left: 0;
-    top: 0;
-    z-index: 2;
-  }
-`;
 
 interface SidebarContextProps {
   collapsed?: boolean;
@@ -196,158 +173,165 @@ interface SidebarContextProps {
   transitionDuration?: number;
 }
 
-export const SidebarContext = React.createContext<SidebarContextProps>({
+export const SidebarContext = createContext<SidebarContextProps>({
   collapsed: false,
   toggled: false,
   rtl: false,
   transitionDuration: 300,
 });
 
-export const Sidebar = React.forwardRef<HTMLHtmlElement, SidebarProps>(
-  (
-    {
-      collapsed,
-      toggled,
-      onBackdropClick,
-      onBreakPoint,
-      width = '250px',
-      collapsedWidth = '80px',
-      defaultCollapsed,
-      className,
-      children,
-      breakPoint,
-      customBreakPoint,
-      backgroundColor = 'rgb(249, 249, 249, 0.7)',
-      transitionDuration = 300,
-      image,
-      rtl,
-      rootStyles,
-      ...rest
-    },
+export const Sidebar = <T = HTMLHtmlElement>(
+  {
+    collapsed,
+    toggled,
+    onBackdropClick,
+    onBreakPoint,
+    width = '250px',
+    collapsedWidth = '80px',
+    defaultCollapsed,
+    className,
+    children,
+    breakPoint,
+    customBreakPoint,
+    backgroundColor = 'bg-[#F9F9F9]/[0.7]',
+    transitionDuration = 300,
+    image,
+    rtl,
+    rootStyles,
     ref,
-  ) => {
-    const getBreakpointValue = () => {
-      if (customBreakPoint) {
-        return `(max-width: ${customBreakPoint})`;
+    ...rest
+  }: SidebarProps
+) => {
+  const getBreakpointValue = () => {
+    if (customBreakPoint) {
+      return `(max-width: ${customBreakPoint})`;
+    }
+
+    if (breakPoint) {
+      if (['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].includes(breakPoint)) {
+        return `(max-width: ${BREAK_POINTS[breakPoint]})`;
       }
 
-      if (breakPoint) {
-        if (['xs', 'sm', 'md', 'lg', 'xl', 'xxl'].includes(breakPoint)) {
-          return `(max-width: ${BREAK_POINTS[breakPoint]})`;
+      if (breakPoint === 'always' || breakPoint === 'all') {
+        if (breakPoint === 'always') {
+          console.warn(
+            'The "always" breakPoint is deprecated and will be removed in future release. ' +
+            'Please use the "all" breakPoint instead.',
+          );
         }
-
-        if (breakPoint === 'always' || breakPoint === 'all') {
-          if (breakPoint === 'always') {
-            console.warn(
-              'The "always" breakPoint is deprecated and will be removed in future release. ' +
-                'Please use the "all" breakPoint instead.',
-            );
-          }
-          return `screen`;
-        }
-
-        return `(max-width: ${breakPoint})`;
-      }
-    };
-
-    const breakpointCallbackFnRef = React.useRef<(broken: boolean) => void>();
-
-    breakpointCallbackFnRef.current = (broken: boolean) => {
-      onBreakPoint?.(broken);
-    };
-
-    const broken = useMediaQuery(getBreakpointValue());
-
-    const [mounted, setMounted] = React.useState(false);
-
-    const legacySidebarContext = useLegacySidebar();
-
-    const collapsedValue =
-      collapsed ?? (!mounted && defaultCollapsed ? true : legacySidebarContext?.collapsed);
-    const toggledValue = toggled ?? legacySidebarContext?.toggled;
-
-    const handleBackdropClick = () => {
-      onBackdropClick?.();
-      legacySidebarContext?.updateSidebarState({ toggled: false });
-    };
-
-    React.useEffect(() => {
-      breakpointCallbackFnRef.current?.(broken);
-    }, [broken]);
-
-    // TODO: remove in next major version
-    React.useEffect(() => {
-      legacySidebarContext?.updateSidebarState({ broken, rtl, transitionDuration });
-
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [broken, legacySidebarContext?.updateSidebarState, rtl, transitionDuration]);
-
-    // TODO: remove in next major version
-    React.useEffect(() => {
-      if (!mounted) {
-        legacySidebarContext?.updateSidebarState({
-          collapsed: defaultCollapsed,
-        });
-        setMounted(true);
+        return `screen`;
       }
 
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [defaultCollapsed, mounted, legacySidebarContext?.updateSidebarState]);
+      return `(max-width: ${breakPoint})`;
+    }
+  };
 
-    return (
-      <SidebarContext.Provider
-        value={{ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }}
-      >
-        <StyledSidebar
-          ref={ref}
-          data-testid={`${sidebarClasses.root}-test-id`}
-          rtl={rtl}
-          rootStyles={rootStyles}
-          width={width}
-          collapsedWidth={collapsedWidth}
-          transitionDuration={transitionDuration}
-          className={classnames(
-            sidebarClasses.root,
-            {
-              [sidebarClasses.collapsed]: collapsedValue,
-              [sidebarClasses.toggled]: toggledValue,
-              [sidebarClasses.broken]: broken,
-              [sidebarClasses.rtl]: rtl,
-            },
+  const breakpointCallbackFnRef = $<(broken: boolean) => void>();
+
+  breakpointCallbackFnRef.current = (broken: boolean) => {
+    onBreakPoint?.(broken);
+  };
+
+  const broken = useMediaQuery(getBreakpointValue());
+
+  const mounted = $(false)
+
+  // const legacySidebarContext = useLegacySidebar();
+
+  const collapsedValue = collapsed ?? (!mounted() && defaultCollapsed);
+  const toggledValue = toggled
+
+  const handleBackdropClick = () => {
+    onBackdropClick?.();
+    // legacySidebarContext?.updateSidebarState({ toggled: false });
+  };
+
+  useEffect(() => {
+    breakpointCallbackFnRef.current?.(broken());
+  },);
+
+  // // TODO: remove in next major version
+  // React.useEffect(() => {
+  //   legacySidebarContext?.updateSidebarState({ broken, rtl, transitionDuration });
+
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [broken, legacySidebarContext?.updateSidebarState, rtl, transitionDuration]);
+
+  // // TODO: remove in next major version
+  // React.useEffect(() => {
+  //   if (!mounted) {
+  //     legacySidebarContext?.updateSidebarState({
+  //       collapsed: defaultCollapsed,
+  //     });
+  //     setMounted(true);
+  //   }
+
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [defaultCollapsed, mounted, legacySidebarContext?.updateSidebarState]);
+
+  return (
+    <SidebarContext.Provider
+      value={{ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }}
+    >
+      <aside
+        ref={ref}
+        rtl={rtl}
+        // rootStyles={rootStyles}
+        // width={width}
+        // collapsedWidth={collapsedWidth}
+        // transitionDuration={transitionDuration}
+        style={{
+          width : collapsedValue ? collapsedWidth : width,
+          minWidth: collapsedValue ? collapsedWidth : width,
+          transitionProperty: "width, left, right",
+          transitionDelay: transitionDuration + "ms",
+          direction: rtl ? "rtl" : "ltr",
+          left:  (broken() && !rtl) ? width : (collapsedValue && !rtl) ? collapsedWidth : "ps-collapsed", 
+          right: (rtl && collapsedValue) ? collapsedWidth : width,
+          
+        }}
+        className={useMemo(() =>
+          [
+            // sidebarClasses.root,
+            // collapsedValue ? `width-${collapsedWidth} min-width: ${collapsedWidth} ${!rtl ? `left-[${collapsedWidth}]` : `right-[${collapsedWidth}]`}` : "ps-collapsed",
+            toggledValue ? `${!rtl ? `left-0` : 'right-0'}` : "ps-toggled",
+            // $$(broken) ? `fixed h-full top-0 z-[100]  ${!rtl ? `left: -[${width}]` : ''}   ` : "ps-broken",
+            // rtl ? `right-${width} ` : "ps-rtl",
+            ,
             className,
-          )}
-          {...rest}
+            `relative;
+            border-r-[1px]
+            border-solid
+            border-[#efefef]
+            `
+          ])}
+        {...rest}
+      >
+        <div
+          className={`relative h-full overflow-y-auto overflow-x-hidden z-3 ${backgroundColor ? `${backgroundColor}` : ''} `}
         >
-          <StyledSidebarContainer
-            data-testid={`${sidebarClasses.container}-test-id`}
-            className={sidebarClasses.container}
-            backgroundColor={backgroundColor}
-          >
-            {children}
-          </StyledSidebarContainer>
+          {children}
+        </div>
 
-          {image && (
-            <StyledSidebarImage
-              data-testid={`${sidebarClasses.image}-test-id`}
-              src={image}
-              alt="sidebar background"
-              className={sidebarClasses.image}
-            />
-          )}
+        {image && (
+          <img
+            src={image}
+            alt="sidebar background"
+            className={sidebarClasses.image}
+          />
+        )}
 
-          {broken && toggledValue && (
-            <StyledBackdrop
-              data-testid={`${sidebarClasses.backdrop}-test-id`}
-              role="button"
-              tabIndex={0}
-              aria-label="backdrop"
-              onClick={handleBackdropClick}
-              onKeyPress={handleBackdropClick}
-              className={sidebarClasses.backdrop}
-            />
-          )}
-        </StyledSidebar>
-      </SidebarContext.Provider>
-    );
-  },
-);
+        {broken() && toggledValue && (
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="backdrop"
+            onClick={handleBackdropClick}
+            onKeyPress={handleBackdropClick}
+            className={sidebarClasses.backdrop}
+          />
+        )}
+      </aside>
+    </SidebarContext.Provider>
+  );
+}
