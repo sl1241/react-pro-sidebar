@@ -21,7 +21,7 @@ export interface SidebarProps extends HTMLAttributes<HTMLHtmlElement> {
   /**
    * sidebar collapsed status
    */
-  collapsed?: boolean;
+  collapsed?: ObservableMaybe<boolean>;
 
   /**
    * width of the sidebar
@@ -79,7 +79,7 @@ export interface SidebarProps extends HTMLAttributes<HTMLHtmlElement> {
   /**
    * sidebar toggled status
    */
-  toggled?: boolean;
+  toggled?: ObservableMaybe<boolean>;
 
   /**
    * callback function to be called when backdrop is clicked
@@ -167,8 +167,8 @@ type StyledSidebarContainerProps = Pick<SidebarProps, 'backgroundColor'>;
 
 
 interface SidebarContextProps {
-  collapsed?: boolean;
-  toggled?: boolean;
+  collapsed?: ObservableMaybe<boolean>;
+  toggled?: ObservableMaybe<boolean>;
   rtl?: boolean;
   transitionDuration?: number;
 }
@@ -180,7 +180,7 @@ export const SidebarContext = createContext<SidebarContextProps>({
   transitionDuration: 300,
 });
 
-export const Sidebar = <T = HTMLHtmlElement>(
+export const Sidebar = (
   {
     collapsed,
     toggled,
@@ -236,10 +236,7 @@ export const Sidebar = <T = HTMLHtmlElement>(
 
   const mounted = $(false)
 
-  // const legacySidebarContext = useLegacySidebar();
-
   const collapsedValue = collapsed ?? (!mounted() && defaultCollapsed);
-  const toggledValue = toggled
 
   const handleBackdropClick = () => {
     onBackdropClick?.();
@@ -271,35 +268,35 @@ export const Sidebar = <T = HTMLHtmlElement>(
 
   return (
     <SidebarContext.Provider
-      value={{ collapsed: collapsedValue, toggled: toggledValue, rtl, transitionDuration }}
+      value={{ collapsed: collapsedValue, toggled: toggled, rtl, transitionDuration }}
     >
       <aside
         ref={ref}
         rtl={rtl}
-        // rootStyles={rootStyles}
-        // width={width}
-        // collapsedWidth={collapsedWidth}
-        // transitionDuration={transitionDuration}
-        style={{
-          width : collapsedValue ? collapsedWidth : width,
-          minWidth: collapsedValue ? collapsedWidth : width,
-          transitionProperty: "width, left, right",
-          transitionDelay: transitionDuration + "ms",
-          direction: rtl ? "rtl" : "ltr",
-          left:  (broken() && !rtl) ? width : (collapsedValue && !rtl) ? collapsedWidth : "ps-collapsed", 
-          right: (rtl && collapsedValue) ? collapsedWidth : width,
-          
-        }}
+
+        style={useMemo(() => {
+          return {
+            position: $$(broken) ? "fixed": "",
+            height: $$(broken) ? "100%" : "",
+            top: $$(broken) ? "0px" : "",
+            zIndex: $$(broken) ? "100" : "",
+            width: $$(collapsedValue) ? collapsedWidth : width,
+            minWidth: $$(collapsedValue) ? collapsedWidth : width,
+            transition: `width , left, right , all ${transitionDuration}ms 0s`, 
+            direction: rtl ? "rtl" : "ltr",
+            left: 
+            ($$(broken) && !$$(toggled) && !rtl) ? "-"+width : ($$(collapsedValue) && !rtl && $$(broken)) 
+            ?  "-"+collapsedWidth : ($$(broken) && $$(toggled) && !rtl) 
+            ?  "0px" : "ps-collapsed",
+            right: (rtl && $$(collapsedValue)) ? collapsedWidth : width,
+
+          }
+        })
+        }
         className={useMemo(() =>
           [
-            // sidebarClasses.root,
-            // collapsedValue ? `width-${collapsedWidth} min-width: ${collapsedWidth} ${!rtl ? `left-[${collapsedWidth}]` : `right-[${collapsedWidth}]`}` : "ps-collapsed",
-            toggledValue ? `${!rtl ? `left-0` : 'right-0'}` : "ps-toggled",
-            // $$(broken) ? `fixed h-full top-0 z-[100]  ${!rtl ? `left: -[${width}]` : ''}   ` : "ps-broken",
-            // rtl ? `right-${width} ` : "ps-rtl",
-            ,
             className,
-            `relative;
+            `
             border-r-[1px]
             border-solid
             border-[#efefef]
@@ -308,7 +305,7 @@ export const Sidebar = <T = HTMLHtmlElement>(
         {...rest}
       >
         <div
-          className={`relative h-full overflow-y-auto overflow-x-hidden z-3 ${backgroundColor ? `${backgroundColor}` : ''} `}
+          className={`h-full overflow-y-auto overflow-x-hidden z-3 ${backgroundColor ? `${backgroundColor}` : ''} `}
         >
           {children}
         </div>
@@ -321,7 +318,7 @@ export const Sidebar = <T = HTMLHtmlElement>(
           />
         )}
 
-        {broken() && toggledValue && (
+        {useMemo(()=>{ return $$(broken) && $$(toggled) && (
           <div
             role="button"
             tabIndex={0}
@@ -330,7 +327,8 @@ export const Sidebar = <T = HTMLHtmlElement>(
             onKeyPress={handleBackdropClick}
             className={sidebarClasses.backdrop}
           />
-        )}
+        )})
+        }
       </aside>
     </SidebarContext.Provider>
   );
