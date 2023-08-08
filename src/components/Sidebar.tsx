@@ -276,7 +276,7 @@ export const Sidebar = (
 
         style={useMemo(() => {
           return {
-            position: $$(broken) ? "fixed": "",
+            position: $$(broken) ? "fixed": "relative",
             height: $$(broken) ? "100%" : "",
             top: $$(broken) ? "0px" : "",
             zIndex: $$(broken) ? "100" : "",
@@ -288,7 +288,7 @@ export const Sidebar = (
             ($$(broken) && !$$(toggled) && !rtl) ? "-"+width : ($$(collapsedValue) && !rtl && $$(broken)) 
             ?  "-"+collapsedWidth : ($$(broken) && $$(toggled) && !rtl) 
             ?  "0px" : "ps-collapsed",
-            right: (rtl && $$(collapsedValue)) ? collapsedWidth : width,
+            // right: (rtl && $$(collapsedValue)) ? collapsedWidth : width,
 
           }
         })
@@ -296,16 +296,12 @@ export const Sidebar = (
         className={useMemo(() =>
           [
             className,
-            `
-            border-r-[1px]
-            border-solid
-            border-[#efefef]
-            `
+            `border-r-[1px] border-solid border-[#efefef]`
           ])}
         {...rest}
       >
         <div
-          className={`h-full overflow-y-auto overflow-x-hidden z-3 ${backgroundColor ? `${backgroundColor}` : ''} `}
+          className={`relative h-full overflow-y-auto overflow-x-hidden z-[3] ${backgroundColor ? `${backgroundColor}` : ''} `}
         >
           {children}
         </div>
