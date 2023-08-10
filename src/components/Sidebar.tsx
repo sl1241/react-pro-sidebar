@@ -233,11 +233,9 @@ export const Sidebar = (
   };
 
   const broken = useMediaQuery(getBreakpointValue());
-
   const mounted = $(false)
 
-  const collapsedValue = collapsed ?? (!mounted() && defaultCollapsed);
-
+  const collapsedValue = collapsed ?? mounted()
   const handleBackdropClick = () => {
     onBackdropClick?.();
     // legacySidebarContext?.updateSidebarState({ toggled: false });
@@ -265,7 +263,6 @@ export const Sidebar = (
 
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [defaultCollapsed, mounted, legacySidebarContext?.updateSidebarState]);
-
   return (
     <SidebarContext.Provider
       value={{ collapsed: collapsedValue, toggled: toggled, rtl, transitionDuration }}
@@ -274,47 +271,46 @@ export const Sidebar = (
         ref={ref}
         rtl={rtl}
 
-        style={useMemo(() => {
-          return {
-            position: $$(broken) ? "fixed": "relative",
-            height: $$(broken) ? "100%" : "",
-            top: $$(broken) ? "0px" : "",
-            zIndex: $$(broken) ? "100" : "",
-            width: $$(collapsedValue) ? collapsedWidth : width,
-            minWidth: $$(collapsedValue) ? collapsedWidth : width,
-            transition: `width , left, right , all ${transitionDuration}ms 0s`, 
-            direction: rtl ? "rtl" : "ltr",
-            left: 
-            ($$(broken) && !$$(toggled) && !rtl) ? "-"+width : ($$(collapsedValue) && !rtl && $$(broken)) 
-            ?  "-"+collapsedWidth : ($$(broken) && $$(toggled) && !rtl) 
-            ?  "0px" : "ps-collapsed",
-            // right: (rtl && $$(collapsedValue)) ? collapsedWidth : width,
-
-          }
-        })
+        style={{
+          position: () => $$(broken) ? "fixed" : "relative",
+          height: () => $$(broken) ? "100%" : "",
+          top: () => $$(broken) ? "0px" : "",
+          zIndex: () => $$(broken) ? "100" : "",
+          width: () => $$(collapsedValue) ? collapsedWidth : width,
+          minWidth:() =>  $$(collapsedValue) ? collapsedWidth : width,
+          transition: () => `width , left, right , all ${transitionDuration}ms 0s`,
+          direction: () => rtl ? "rtl" : "ltr",
+          left:() => 
+            ($$(broken) && !$$(toggled) && !rtl) ? "-" + width : ($$(collapsed) && !rtl && $$(broken))
+              ? "-" + collapsedWidth : ($$(broken) && $$(toggled) && !rtl)
+                ? "0px" : "ps-collapsed",
+          // right: (rtl && $$(collapsedValue)) ? collapsedWidth : width,
         }
-        className={useMemo(() =>
-          [
-            className,
-            `border-r-[1px] border-solid border-[#efefef]`
-          ])}
-        {...rest}
+        }
+      className={
+        [
+          rootStyles,
+          className,
+          `border-r-[1px] border-solid border-[#efefef]`,
+        ]}
+      {...rest}
       >
-        <div
-          className={`relative h-full overflow-y-auto overflow-x-hidden z-[3] ${backgroundColor ? `${backgroundColor}` : ''} `}
-        >
-          {children}
-        </div>
+      <div
+        className={`relative h-full overflow-y-auto overflow-x-hidden z-[3] ${backgroundColor ? `${backgroundColor}` : ''} `}
+      >
+        {children}
+      </div>
 
-        {image && (
-          <img
-            src={image}
-            alt="sidebar background"
-            className={sidebarClasses.image}
-          />
-        )}
+      {image && (
+        <img
+          src={image}
+          alt="sidebar background"
+          className={sidebarClasses.image}
+        />
+      )}
 
-        {useMemo(()=>{ return $$(broken) && $$(toggled) && (
+      {useMemo(() => {
+        return $$(broken) && $$(toggled) && (
           <div
             role="button"
             tabIndex={0}
@@ -323,9 +319,10 @@ export const Sidebar = (
             onKeyPress={handleBackdropClick}
             className={sidebarClasses.backdrop}
           />
-        )})
-        }
-      </aside>
-    </SidebarContext.Provider>
+        )
+      })
+      }
+    </aside>
+    </SidebarContext.Provider >
   );
 }

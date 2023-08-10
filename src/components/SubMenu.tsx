@@ -16,7 +16,7 @@ import { usePopper } from '../hooks/usePopper';
 import { MenuButton, menuButtonStyles } from './MenuButton';
 import { SidebarContext } from './Sidebar';
 import { LevelContext } from './Menu';
-import { useContext, $, $$, useEffect } from 'voby';
+import { useContext, $, $$, useEffect, useMemo } from 'voby';
 
 export interface SubMenuProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
@@ -97,28 +97,6 @@ type MenuItemElement =
   | 'subMenuContent'
   | 'SubMenuExpandIcon';
 
-// const StyledSubMenu = styled.li<StyledSubMenuProps>`
-//   position: relative;
-//   width: 100%;
-
-//   ${({ menuItemStyles }) => menuItemStyles};
-
-//   ${({ rootStyles }) => rootStyles};
-
-//   > .${menuClasses.button} {
-//     ${({ level, disabled, active, collapsed, rtl }) =>
-//       menuButtonStyles({
-//         level,
-//         disabled,
-//         active,
-//         collapsed,
-//         rtl,
-//       })};
-
-//     ${({ buttonStyles }) => buttonStyles};
-//   }
-// `;
-
 export const SubMenuFR = (
   {
     children,
@@ -142,7 +120,6 @@ export const SubMenuFR = (
   }: SubMenuProps,
 ) => {
   const level = useContext(LevelContext);
-  debugger
   const {
     collapsed,
     rtl,
@@ -166,7 +143,7 @@ export const SubMenuFR = (
   });
 
   const slideUp = () => {
-    const target = contentRef.current;
+    const target = contentRef();
     if (target) {
       target.style.display = 'block';
       target.style.overflow = 'hidden';
@@ -176,35 +153,35 @@ export const SubMenuFR = (
       target.offsetHeight;
       target.style.height = `${height}px`;
 
-      timer.current = setTimeout(() => {
+      timer(setTimeout(() => {
         target.style.overflow = 'auto';
         target.style.height = 'auto';
-      }, transitionDuration);
+      }, transitionDuration))
     }
   };
 
   const slideDown = () => {
-    const target = contentRef.current;
+    const target = contentRef();
     if (target) {
       target.style.overflow = 'hidden';
       target.style.height = `${target.offsetHeight}px`;
       target.offsetHeight;
       target.style.height = '0px';
 
-      timer.current = setTimeout(() => {
+      timer(setTimeout(() => {
         target.style.overflow = 'auto';
         target.style.display = 'none';
-      }, transitionDuration);
+      }, transitionDuration))
     }
   };
 
   const handleSlideToggle = (): void => {
-    if (!(level === 0 && collapsed)) {
-      clearTimeout(Number(timer.current));
-      const openValue = openControlled ?? open;
+    if (!(level === 0 && $$(collapsed))) {
+      clearTimeout(Number(timer()));
+      const openValue = openControlled ?? $$(open);
       openValue ? slideDown() : slideUp();
       onOpenChange?.(!openValue);
-      typeof openControlled === 'undefined' && setOpen(!open);
+      open(!open());
     }
   };
 
@@ -222,7 +199,7 @@ export const SubMenuFR = (
 
   const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
     if (menuItemStyles) {
-      const params = { level, disabled, active, isSubmenu: true, open: openControlled ?? open };
+      const params = { level, disabled, active, isSubmenu: true, open };
       const {
         root: rootElStyles,
         button: buttonElStyles,
@@ -274,13 +251,16 @@ export const SubMenuFR = (
     if ($$(collapsed) && level === 0) {
       openWhenCollapsed(false);
       // ? if its useful to close first level submenus on collapse sidebar uncomment the code below
-      // setOpen(false);
+      open(false);
     }
   })
-
+  useEffect(()=>{
+    console.log("openWhenCollapsed", openWhenCollapsed())
+  })
   useEffect(() => {
     const handleTogglePopper = (target: Node) => {
-      if (!$$(openWhenCollapsed) && buttonRef.current?.contains(target)){
+      debugger
+      if (!$$(openWhenCollapsed) && buttonRef()?.contains(target)){
         openWhenCollapsed(true);
       } 
       else if (
@@ -288,13 +268,14 @@ export const SubMenuFR = (
           !(target as HTMLElement)
             .closest(`.${menuClasses.menuItemRoot}`)
             ?.classList.contains(menuClasses.subMenuRoot)) ||
-        (!contentRef.current?.contains(target) && openWhenCollapsed)
+        (!contentRef()?.contains(target) && $$(openWhenCollapsed))
       ) {
         openWhenCollapsed(false);
       }
     };
 
     const handleDocumentClick = (event: MouseEvent) => {
+      debugger
       handleTogglePopper(event.target as Node);
     };
 
@@ -322,16 +303,27 @@ export const SubMenuFR = (
       removeEventListeners();
     };
   })
+  useEffect(() => {
+    if (openControlled !== undefined && openControlled !== $$(open)) {
+      if (!(level === 0 && collapsed)) {
+        clearTimeout(Number(timer()));
+
+        !openControlled ? slideDown() : slideUp();
+        open(openControlled);
+      }
+    }
+    // Excluded slideUp and slideDown from deps because they are not supposed to change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
 
   useEffect(() => {
     mounted(true);
-    console.log(collapsed)
   })
 
   const sharedClasses = {
     [menuClasses.active]: active,
     [menuClasses.disabled]: disabled,
-    [menuClasses.open]: openControlled ?? open,
+    [menuClasses.open]: open(),
   };
 
   return (
@@ -351,30 +343,25 @@ export const SubMenuFR = (
         rootStyles,
         getSubMenuItemStyles('button'),
         `relative w-full
-        [&_.ps-menu-button]>:    
-        flex 
-        items-center 
-        h-[50px] 
-        no-underline
-        text-inherit
-        box-border
-        cursor-pointer
-        hover:bg-[#f3f3f3]
-        ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""}
-        ${active ? 'background-color: #e2eef9' : ""}
         `
         ]
       }
-      level={level}
-      collapsed={collapsed}
-      rtl={rtl}
       disabled={disabled}
-      active={active}
     >
       <MenuButton
         ref={buttonRef}
         title={title}
-        className={[menuClasses.button, sharedClasses]}
+        style={useMemo(()=>{return {
+          paddingLeft: rtl ? "20px" : `${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px`,
+          paddingRight: rtl ? ` ${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px` : "20px"
+        }})
+      }
+        className={
+          [
+          menuClasses.button,
+          sharedClasses,
+          `flex items-center h-[50px] no-underline text-inherit box-border cursor-pointer hover:bg-[#f3f3f3] ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""} ${active ? 'background-color: #e2eef9' : ""}`
+        ]}
         onClick={handleOnClick}
         onKeyUp={handleOnKeyUp}
         component={component}
@@ -433,33 +420,35 @@ export const SubMenuFR = (
             [
               menuClasses.SubMenuExpandIcon,
               sharedClasses,
-              `${($$(collapsed) && level === 0) ? `absolute top-1/2 translate-y-[-50%] ${rtl ? "left-2.5" : "right-2.5"}` : "" }`,
+              `${(!$$(collapsed) && level === 0) ? `absolute top-1/2 translate-y-[-50%] ${rtl ? "left-2.5" : "right-2.5"}` : "" }`,
               getSubMenuItemStyles('SubMenuExpandIcon')
             ]}
         >
-          {renderExpandIcon ? 
+          {useMemo(()=>{return renderExpandIcon ? 
           (
             renderExpandIcon({
               level,
               disabled,
               active,
-              open: openControlled ?? $$(open),
+              open: $$(open),
             })
           ) 
-          : $$(collapsed) && level === 0 ? (
+          : $$(collapsed) && level  === 0 ? (
             <span 
             className={"w-[5px] h-[5px] bg-current rounded-[50%] inline-block "} 
             />
           ) : (
             <span
             style={{
+              transition: "transform 0.3s",
               transform: `rotate(${$$(open) ? `${rtl ? '-135deg' : '45deg'}` : '-45deg'}`
             }} 
             className={
             `inline-block w-[5px] h-[5px]
              ${rtl ? "border-solid border-l-2 border-t-2 border-current" : "border-solid border-r-2 border-b-2 border-current" }`}
-            open={openControlled ?? open}
+            open={$$(open)}
             />
+          )}
           )}
         </span>
       </MenuButton>
@@ -467,7 +456,7 @@ export const SubMenuFR = (
       <SubMenuContent
         ref={contentRef}
         openWhenCollapsed={openWhenCollapsed}
-        open={openControlled ?? $$(open)}
+        open={open}
         firstLevel={level === 0}
         collapsed={collapsed}
         defaultOpen={(openControlled && !$$(mounted)) || defaultOpen}

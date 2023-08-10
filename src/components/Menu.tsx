@@ -1,4 +1,4 @@
-import { createContext, useMemo } from 'voby';
+import { $$, createContext, useMemo } from 'voby';
 import { menuClasses } from '../utils/utilityClasses';
 
 export interface MenuItemStylesParams {
@@ -84,9 +84,8 @@ const MenuFR = (
 ) => {
   
   const providerValue = useMemo(() => ({ transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon }));
-
   return (
-    <MenuContext.Provider value={providerValue}>
+    <MenuContext.Provider value={$$(providerValue)}>
       <LevelContext.Provider value={0}>
         <nav
           ref={ref}

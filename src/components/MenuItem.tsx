@@ -4,7 +4,7 @@ import { menuClasses } from '../utils/utilityClasses';
 import { MenuButton } from './MenuButton';
 import { LevelContext } from './Menu';
 import { SidebarContext } from './Sidebar';
-import { useContext } from 'voby';
+import { $$, useContext, useMemo } from 'voby';
 
 export interface MenuItemProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
@@ -143,10 +143,6 @@ export const MenuItemFR = (
   return (
     <li
       ref={ref}
-      style={{
-        paddingLeft: rtl ? "20px" : `${level === 0 ? 20 : (collapsed ? level : level + 1) * 20}px`,
-        paddingRight: rtl ? ` ${level === 0 ? 20 : (collapsed ? level : level + 1) * 20}px` : "20px"
-      }}
       className={[
         menuClasses.menuItemRoot,
         sharedClasses,
@@ -155,25 +151,21 @@ export const MenuItemFR = (
         getMenuItemStyles("button"),
         rootStyles,
         `w-full relative
-        [&_.ps-menu-button]>:    
-        flex 
-        items-center 
-        h-[50px] 
-        no-underline
-        text-inherit
-        box-border
-        cursor-pointer
-        hover:bg-[#f3f3f3]
-        ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""}
-        ${active ? 'background-color: #e2eef9' : ""}
-
         `
       ]}
       disabled={disabled}
     >
       <MenuButton
-        className={classnames(menuClasses.button, sharedClasses)}
-        data-testid={`${menuClasses.button}-test-id`}
+        style={{
+          paddingLeft: ()=> rtl ? "20px" : `${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px`,
+          paddingRight: ()=>rtl ? ` ${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px` : "20px"
+        }}
+        className={
+          [
+            menuClasses.button,
+            sharedClasses,
+            `flex items-center h-[50px] no-underline text-inheritbox-border cursor-pointer hover:bg-[#f3f3f3] ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""} ${active ? 'background-color: #e2eef9' : ""}`
+          ]}
         component={component}
         tabIndex={0}
         {...rest}
