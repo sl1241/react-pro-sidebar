@@ -179,8 +179,8 @@ export const MenuItemFR = (
             className={[
               menuClasses.icon,
               sharedClasses,
-              getMenuItemStyles('icon')
-                `w-[35px]
+              getMenuItemStyles('icon'),
+              `w-[35px]
               min-w-[35px]
               h-[35px]
               leading-[35px]

@@ -368,28 +368,38 @@ export const SubMenuFR = (
         tabIndex={0}
         {...rest}
       >
-        {/* {icon && (
-          <StyledMenuIcon
-            rtl={rtl}
-            className={classnames(menuClasses.icon, sharedClasses)}
-            rootStyles={getSubMenuItemStyles('icon')}
+        {icon && (
+          <span
+            className={
+              [
+                menuClasses.icon,
+                sharedClasses,
+                `w-[35px] min-w-[35px] h-[35px] leading-[35px] text-center inline-flex rounded-sm items-center justify-center`,
+                `${rtl ? "ml-2.5" : "mr-2.5"}`,
+                getSubMenuItemStyles('icon')
+              ]}
           >
             {icon}
-          </StyledMenuIcon>
-        )} */}
+          </span>
+        )}
 
-        {/* {prefix && (
-          <StyledMenuPrefix
-            collapsed={collapsed}
-            transitionDuration={sidebarTransitionDuration}
-            firstLevel={level === 0}
-            className={classnames(menuClasses.prefix, sharedClasses)}
-            rtl={rtl}
-            rootStyles={getSubMenuItemStyles('prefix')}
+        {prefix && (
+          <span
+            style={{
+              transition: `opacity ${sidebarTransitionDuration}ms`
+            }}
+            className={
+              [
+                menuClasses.prefix,
+                sharedClasses,
+                `${rtl ? "ml-[5px]" : "mr-[5px]"}`,
+                `${(level === 0 && $$(collapsed)) ? "opacity-0": "opacity-100"}`,
+                getSubMenuItemStyles('prefix') 
+              ]}
           >
             {prefix}
-          </StyledMenuPrefix>
-        )} */}
+          </span>
+        )}
 
         <span
           className={
@@ -403,17 +413,23 @@ export const SubMenuFR = (
           {label}
         </span>
 
-        {/* {suffix && (
-          <StyledMenuSuffix
-            collapsed={collapsed}
-            transitionDuration={sidebarTransitionDuration}
-            firstLevel={level === 0}
-            className={classnames(menuClasses.suffix, sharedClasses)}
-            rootStyles={getSubMenuItemStyles('suffix')}
+        {suffix && (
+          <span
+            style={{
+              transition: `opacity ${sidebarTransitionDuration}ms`
+            }}
+            className={
+              [
+                menuClasses.suffix,
+                sharedClasses,
+                `mr-[5px] ml-[5px]`,
+                `${(level === 0 && $$(collapsed)) ? "opacity-0": "opacity-100"}`,
+                getSubMenuItemStyles('suffix')
+              ]}
           >
             {suffix}
-          </StyledMenuSuffix>
-        )} */}
+          </span>
+        )}
 
         <span
           className={
