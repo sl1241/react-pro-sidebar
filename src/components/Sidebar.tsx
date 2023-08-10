@@ -272,19 +272,14 @@ export const Sidebar = (
         rtl={rtl}
 
         style={{
-          position: () => $$(broken) ? "fixed" : "relative",
-          height: () => $$(broken) ? "100%" : "",
-          top: () => $$(broken) ? "0px" : "",
-          zIndex: () => $$(broken) ? "100" : "",
           width: () => $$(collapsedValue) ? collapsedWidth : width,
           minWidth:() =>  $$(collapsedValue) ? collapsedWidth : width,
-          transition: () => `width , left, right , all ${transitionDuration}ms 0s`,
+          transition: `width , left, right , all ${transitionDuration}ms 0s`,
           direction: () => rtl ? "rtl" : "ltr",
           left:() => 
             ($$(broken) && !$$(toggled) && !rtl) ? "-" + width : ($$(collapsed) && !rtl && $$(broken))
               ? "-" + collapsedWidth : ($$(broken) && $$(toggled) && !rtl)
                 ? "0px" : "ps-collapsed",
-          // right: (rtl && $$(collapsedValue)) ? collapsedWidth : width,
         }
         }
       className={
@@ -292,6 +287,7 @@ export const Sidebar = (
           rootStyles,
           className,
           `border-r-[1px] border-solid border-[#efefef]`,
+          `${$$(broken) ? "fixed h-full top-0 z-[100]" : ""}`
         ]}
       {...rest}
       >
