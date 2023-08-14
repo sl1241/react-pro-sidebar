@@ -1,7 +1,6 @@
 import { createContext, useEffect, $, $$, useMemo, useContext } from 'voby';
-import classnames from 'classnames';
-import { useLegacySidebar } from '../hooks/useLegacySidebar';
-import { useMediaQuery } from '../hooks/useMediaQuery';
+// import { useMediaQuery } from '../hooks/useMediaQuery';
+import { useMediaQuery } from '../../../use-voby/src/useMediaQuery/useMediaQuery';
 import { sidebarClasses } from '../utils/utilityClasses';
 
 type BreakPoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' | 'always' | 'all';
@@ -34,6 +33,12 @@ export interface SidebarProps extends HTMLAttributes<HTMLHtmlElement> {
    * @default ```80px```
    */
   collapsedWidth?: string;
+
+  /**
+ * Used to  control whether the main content is active when toggled
+ * @default ```true```
+ */
+  activeWhenCollapsed?: ObservableMaybe<boolean>;
 
   /**
    * initial collapsed status
@@ -94,19 +99,10 @@ export interface SidebarProps extends HTMLAttributes<HTMLHtmlElement> {
   /**
    * sidebar styles to be applied from the root element
    */
-  rootStyles?: CSSObject;
+  rootStyles?: ObservableMaybe<string>;
 
-  children?: React.ReactNode;
+  children?: JSX.Child;
 }
-
-interface StyledSidebarProps extends Omit<SidebarProps, 'backgroundColor'> {
-  collapsed?: boolean;
-  toggled?: boolean;
-  broken?: boolean;
-  rtl?: boolean;
-}
-
-type StyledSidebarContainerProps = Pick<SidebarProps, 'backgroundColor'>;
 
 // const StyledSidebar = styled.aside<StyledSidebarProps>`
 //   position: relative;
@@ -188,6 +184,7 @@ export const Sidebar = (
     onBreakPoint,
     width = '250px',
     collapsedWidth = '80px',
+    activeWhenCollapsed,
     defaultCollapsed,
     className,
     children,
@@ -226,14 +223,13 @@ export const Sidebar = (
     }
   };
 
-  const breakpointCallbackFnRef = $<(broken: boolean) => void>();
-
-  breakpointCallbackFnRef.current = (broken: boolean) => {
+  const breakpointCallbackFnRef = (broken: boolean) => {
     onBreakPoint?.(broken);
-  };
+  }
 
   const broken = useMediaQuery(getBreakpointValue());
   const mounted = $(false)
+  const active = activeWhenCollapsed ?? $(true)
 
   const collapsedValue = collapsed ?? mounted()
   const handleBackdropClick = () => {
@@ -242,27 +238,9 @@ export const Sidebar = (
   };
 
   useEffect(() => {
-    breakpointCallbackFnRef.current?.(broken());
+    breakpointCallbackFnRef(broken());
   },);
 
-  // // TODO: remove in next major version
-  // React.useEffect(() => {
-  //   legacySidebarContext?.updateSidebarState({ broken, rtl, transitionDuration });
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [broken, legacySidebarContext?.updateSidebarState, rtl, transitionDuration]);
-
-  // // TODO: remove in next major version
-  // React.useEffect(() => {
-  //   if (!mounted) {
-  //     legacySidebarContext?.updateSidebarState({
-  //       collapsed: defaultCollapsed,
-  //     });
-  //     setMounted(true);
-  //   }
-
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [defaultCollapsed, mounted, legacySidebarContext?.updateSidebarState]);
   return (
     <SidebarContext.Provider
       value={{ collapsed: collapsedValue, toggled: toggled, rtl, transitionDuration }}
@@ -272,53 +250,57 @@ export const Sidebar = (
         rtl={rtl}
 
         style={{
+          position: () => $$(broken) ? "fixed" : "",
+          height: () => $$(broken) ? "100%" : "",
+          top: () => $$(broken) ? "0px" : "",
+          zIndex: () => $$(broken) && $(active) ? "100" : "0",
           width: () => $$(collapsedValue) ? collapsedWidth : width,
-          minWidth:() =>  $$(collapsedValue) ? collapsedWidth : width,
+          minWidth: () => $$(collapsedValue) ? collapsedWidth : width,
           transition: `width , left, right , all ${transitionDuration}ms 0s`,
           direction: () => rtl ? "rtl" : "ltr",
-          left:() => 
+          right: () => $$(broken) ? "80px" : "",
+          left: () =>
             ($$(broken) && !$$(toggled) && !rtl) ? "-" + width : ($$(collapsed) && !rtl && $$(broken))
               ? "-" + collapsedWidth : ($$(broken) && $$(toggled) && !rtl)
                 ? "0px" : "ps-collapsed",
         }
         }
-      className={
-        [
-          rootStyles,
-          className,
-          `border-r-[1px] border-solid border-[#efefef]`,
-          `${$$(broken) ? "fixed h-full top-0 z-[100]" : ""}`
-        ]}
-      {...rest}
+        className={
+          [
+            rootStyles,
+            className,
+            `border-r-[1px] border-solid border-[#efefef]`,
+          ]}
+        {...rest}
       >
-      <div
-        className={`relative h-full overflow-y-auto overflow-x-hidden z-[3] ${backgroundColor ? `${backgroundColor}` : ''} `}
-      >
-        {children}
-      </div>
+        <div
+          className={`relative h-full overflow-y-auto overflow-x-hidden z-[3] ${backgroundColor ? `${backgroundColor}` : ''} `}
+        >
+          {children}
+        </div>
 
-      {image && (
-        <img
-          src={image}
-          alt="sidebar background"
-          className={sidebarClasses.image}
-        />
-      )}
-
-      {useMemo(() => {
-        return $$(broken) && $$(toggled) && (
-          <div
-            role="button"
-            tabIndex={0}
-            aria-label="backdrop"
-            onClick={handleBackdropClick}
-            onKeyPress={handleBackdropClick}
-            className={sidebarClasses.backdrop}
+        {image && (
+          <img
+            src={image}
+            alt="sidebar background"
+            className={sidebarClasses.image}
           />
-        )
-      })
-      }
-    </aside>
+        )}
+
+        {useMemo(() => {
+          return !$$(active) && $$(broken) && $$(toggled) && (
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="backdrop"
+              onClick={handleBackdropClick}
+              onKeyPress={handleBackdropClick}
+              className={sidebarClasses.backdrop}
+            />
+          )
+        })
+        }
+      </aside>
     </SidebarContext.Provider >
   );
 }

@@ -1,9 +1,9 @@
 import classNames from 'classnames';
 import { cloneElement, createElement } from 'voby';
 
-interface MenuButtonProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
-  component?: string | React.ReactElement;
-  children?: React.ReactNode;
+interface MenuButtonProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
+  component?: string | JSX.Child;
+  children?: JSX.Child;
 }
 
 interface MenuButtonStylesProps {

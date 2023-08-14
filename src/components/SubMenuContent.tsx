@@ -1,55 +1,17 @@
-import { menuClasses } from '../utils/utilityClasses';
 import { useMenu } from '../hooks/useMenu';
-import { $, $$, useEffect, useMemo } from 'voby';
+import { $, $$ } from 'voby';
 
-interface SubMenuContentProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SubMenuContentProps extends HTMLAttributes<HTMLDivElement> {
   transitionDuration?: number;
   open?: ObservableMaybe<boolean>;
   openWhenCollapsed?: ObservableMaybe<boolean>;
   firstLevel?: boolean;
   collapsed?: ObservableMaybe<boolean>;
   defaultOpen?: boolean;
-  rootStyles?: CSSObject;
-  children?: React.ReactNode;
+  rootStyles?: ObservableMaybe<string>;
+  children?: JSX.Child
 }
 
-// const StyledSubMenuContent = styled.div<SubMenuContentProps>`
-//   display: none;
-//   overflow: hidden;
-//   z-index: 999;
-//   transition: height ${({ transitionDuration }) => transitionDuration}ms;
-//   box-sizing: border-box;
-//   background-color: white;
-
-//   ${({ firstLevel, collapsed }) =>
-//     firstLevel &&
-//     collapsed &&
-//     `
-//      background-color: white;
-//      box-shadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
-//      `}
-
-//   ${({ defaultOpen }) => defaultOpen && 'height: auto;display: block;'}
-
-//   ${({ collapsed, firstLevel, openWhenCollapsed }) =>
-//     collapsed && firstLevel
-//       ? `
-//       position: fixed;
-//       padding-left: 0px;
-//       width: 200px;
-//       border-radius: 4px;
-//       height: auto!important;
-//       display: block!important;     
-//       transition: none!important;     
-//       visibility: ${openWhenCollapsed ? 'visible' : 'hidden'};
-//      `
-//       : `
-//       position: static!important;
-//       transform: none!important;
-//       `};
-
-//   ${({ rootStyles }) => rootStyles};
-// `;
 
 const SubMenuContentFR = (
   { children, open, openWhenCollapsed, firstLevel, collapsed, defaultOpen, ref, ...rest }: SubMenuContentProps,

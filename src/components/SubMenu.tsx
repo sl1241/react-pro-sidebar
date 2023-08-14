@@ -1,44 +1,35 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import classnames from 'classnames';
 import { SubMenuContent } from './SubMenuContent';
-import { StyledMenuLabel } from '../styles/StyledMenuLabel';
-import { StyledMenuIcon } from '../styles/StyledMenuIcon';
-import { StyledMenuPrefix } from '../styles/StyledMenuPrefix';
 import { useMenu } from '../hooks/useMenu';
-import { StyledMenuSuffix } from '../styles/StyledMenuSuffix';
 import { menuClasses } from '../utils/utilityClasses';
-import {
-  StyledExpandIcon,
-  StyledExpandIconCollapsed,
-  StyledExpandIconWrapper,
-} from '../styles/StyledExpandIcon';
 import { usePopper } from '../hooks/usePopper';
-import { MenuButton, menuButtonStyles } from './MenuButton';
+import { MenuButton } from './MenuButton';
 import { SidebarContext } from './Sidebar';
 import { LevelContext } from './Menu';
 import { useContext, $, $$, useEffect, useMemo } from 'voby';
 
 export interface SubMenuProps
-  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
   /**
    * The label to be displayed in the menu item
    */
-  label?: string | React.ReactNode;
+  label?: string | JSX.Child;
 
   /**
    * The icon to be displayed in the menu item
    */
-  icon?: React.ReactNode;
+  icon?: JSX.Child;
 
   /**
    * The prefix to be displayed in the menu item
    */
-  prefix?: React.ReactNode;
+  prefix?: JSX.Child;
 
   /**
    * The suffix to be displayed in the menu item
    */
-  suffix?: React.ReactNode;
+  suffix?: JSX.Child;
 
   /**
    * set open value to control the open state of the sub menu
@@ -63,12 +54,12 @@ export interface SubMenuProps
   /**
    * The component to be rendered as the menu item button
    */
-  component?: string | React.ReactElement;
+  component?: string | JSX.Child;
 
   /**
-   * Apply styles from the root element
+   * Apply styles from the root element(tailwind)
    */
-  rootStyles?: CSSObject;
+  rootStyles?: ObservableMaybe<string>;
 
   /**
    * callback function to be called when the open state of the sub menu changes
@@ -76,15 +67,15 @@ export interface SubMenuProps
    */
   onOpenChange?: (open: boolean) => void;
 
-  children?: React.ReactNode;
+  children?: JSX.Child;
 }
 
 interface StyledSubMenuProps extends Pick<SubMenuProps, 'rootStyles' | 'active' | 'disabled'> {
   level: number;
-  menuItemStyles?: CSSObject;
+  menuItemStyles?: ObservableMaybe<string>;
   collapsed?: boolean;
   rtl?: boolean;
-  buttonStyles?: CSSObject;
+  buttonStyles?: ObservableMaybe<string>;
 }
 
 type MenuItemElement =
@@ -185,19 +176,19 @@ export const SubMenuFR = (
     }
   };
 
-  const handleOnClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+  const handleOnClick = (event: TargetedMouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
     handleSlideToggle();
   };
 
-  const handleOnKeyUp = (event: React.KeyboardEvent<HTMLAnchorElement>) => {
+  const handleOnKeyUp = (event: TargetedKeyboardEvent<HTMLAnchorElement>) => {
     onKeyUp?.(event);
     if (event.key === 'Enter') {
       handleSlideToggle();
     }
   };
 
-  const getSubMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
+  const getSubMenuItemStyles = (element: MenuItemElement): ObservableMaybe<string> | undefined => {
     if (menuItemStyles) {
       const params = { level, disabled, active, isSubmenu: true, open };
       const {
@@ -254,15 +245,15 @@ export const SubMenuFR = (
       open(false);
     }
   })
-  useEffect(()=>{
+  useEffect(() => {
     console.log("openWhenCollapsed", openWhenCollapsed())
   })
   useEffect(() => {
     const handleTogglePopper = (target: Node) => {
       debugger
-      if (!$$(openWhenCollapsed) && buttonRef()?.contains(target)){
+      if (!$$(openWhenCollapsed) && buttonRef()?.contains(target)) {
         openWhenCollapsed(true);
-      } 
+      }
       else if (
         (closeOnClick &&
           !(target as HTMLElement)
@@ -335,14 +326,14 @@ export const SubMenuFR = (
       }}
       className={
         [
-        menuClasses.menuItemRoot,
-        menuClasses.subMenuRoot,
-        sharedClasses,
-        className,
-        getSubMenuItemStyles('root'),
-        rootStyles,
-        getSubMenuItemStyles('button'),
-        `relative w-full
+          menuClasses.menuItemRoot,
+          menuClasses.subMenuRoot,
+          sharedClasses,
+          className,
+          getSubMenuItemStyles('root'),
+          rootStyles,
+          getSubMenuItemStyles('button'),
+          `relative w-full
         `
         ]
       }
@@ -351,17 +342,19 @@ export const SubMenuFR = (
       <MenuButton
         ref={buttonRef}
         title={title}
-        style={useMemo(()=>{return {
-          paddingLeft: rtl ? "20px" : `${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px`,
-          paddingRight: rtl ? ` ${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px` : "20px"
-        }})
-      }
+        style={useMemo(() => {
+          return {
+            paddingLeft: rtl ? "20px" : `${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px`,
+            paddingRight: rtl ? ` ${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px` : "20px"
+          }
+        })
+        }
         className={
           [
-          menuClasses.button,
-          sharedClasses,
-          `flex items-center h-[50px] no-underline text-inherit box-border cursor-pointer hover:bg-[#f3f3f3] ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""} ${active ? 'background-color: #e2eef9' : ""}`
-        ]}
+            menuClasses.button,
+            sharedClasses,
+            `flex items-center h-[50px] no-underline text-inherit box-border cursor-pointer hover:bg-[#f3f3f3] ${disabled ? `pointer-events-none cursor-default color-[#adadad]` : ""} ${active ? 'background-color: #e2eef9' : ""}`
+          ]}
         onClick={handleOnClick}
         onKeyUp={handleOnKeyUp}
         component={component}
@@ -393,8 +386,8 @@ export const SubMenuFR = (
                 menuClasses.prefix,
                 sharedClasses,
                 `${rtl ? "ml-[5px]" : "mr-[5px]"}`,
-                `${(level === 0 && $$(collapsed)) ? "opacity-0": "opacity-100"}`,
-                getSubMenuItemStyles('prefix') 
+                `${(level === 0 && $$(collapsed)) ? "opacity-0" : "opacity-100"}`,
+                getSubMenuItemStyles('prefix')
               ]}
           >
             {prefix}
@@ -404,11 +397,11 @@ export const SubMenuFR = (
         <span
           className={
             [
-            menuClasses.label,
-            sharedClasses,
-            `grow overflow-hidden text-ellipsis whitespace-nowrap`,
-            getSubMenuItemStyles('label')
-          ]}
+              menuClasses.label,
+              sharedClasses,
+              `grow overflow-hidden text-ellipsis whitespace-nowrap`,
+              getSubMenuItemStyles('label')
+            ]}
         >
           {label}
         </span>
@@ -423,7 +416,7 @@ export const SubMenuFR = (
                 menuClasses.suffix,
                 sharedClasses,
                 `mr-[5px] ml-[5px]`,
-                `${(level === 0 && $$(collapsed)) ? "opacity-0": "opacity-100"}`,
+                `${(level === 0 && $$(collapsed)) ? "opacity-0" : "opacity-100"}`,
                 getSubMenuItemStyles('suffix')
               ]}
           >
@@ -436,35 +429,37 @@ export const SubMenuFR = (
             [
               menuClasses.SubMenuExpandIcon,
               sharedClasses,
-              `${(!$$(collapsed) && level === 0) ? `absolute top-1/2 translate-y-[-50%] ${rtl ? "left-2.5" : "right-2.5"}` : "" }`,
+              `${(!$$(collapsed) && level === 0) ? `absolute top-1/2 translate-y-[-50%] ${rtl ? "left-2.5" : "right-2.5"}` : ""}`,
               getSubMenuItemStyles('SubMenuExpandIcon')
             ]}
         >
-          {useMemo(()=>{return renderExpandIcon ? 
-          (
-            renderExpandIcon({
-              level,
-              disabled,
-              active,
-              open: $$(open),
-            })
-          ) 
-          : $$(collapsed) && level  === 0 ? (
-            <span 
-            className={"w-[5px] h-[5px] bg-current rounded-[50%] inline-block "} 
-            />
-          ) : (
-            <span
-            style={{
-              transition: "transform 0.3s",
-              transform: `rotate(${$$(open) ? `${rtl ? '-135deg' : '45deg'}` : '-45deg'}`
-            }} 
-            className={
-            `inline-block w-[5px] h-[5px]
-             ${rtl ? "border-solid border-l-2 border-t-2 border-current" : "border-solid border-r-2 border-b-2 border-current" }`}
-            open={$$(open)}
-            />
-          )}
+          {useMemo(() => {
+            return renderExpandIcon ?
+              (
+                renderExpandIcon({
+                  level,
+                  disabled,
+                  active,
+                  open: $$(open),
+                })
+              )
+              : $$(collapsed) && level === 0 ? (
+                <span
+                  className={"w-[5px] h-[5px] bg-current rounded-[50%] inline-block "}
+                />
+              ) : (
+                <span
+                  style={{
+                    transition: "transform 0.3s",
+                    transform: `rotate(${$$(open) ? `${rtl ? '-135deg' : '45deg'}` : '-45deg'}`
+                  }}
+                  className={
+                    `inline-block w-[5px] h-[5px]
+             ${rtl ? "border-solid border-l-2 border-t-2 border-current" : "border-solid border-r-2 border-b-2 border-current"}`}
+                  open={$$(open)}
+                />
+              )
+          }
           )}
         </span>
       </MenuButton>

@@ -2,41 +2,42 @@ import { Sidebar } from '../components/Sidebar';
 import { Menu } from '../components/Menu';
 import { MenuItem } from '../components/MenuItem';
 import "./index.css"
-import { render, $, useEffect } from 'voby';
+import { render, $, useEffect, $$ } from 'voby';
 import { SubMenu } from '../components/SubMenu';
  
 const App = () => {
     const collapsed = $(false)
     const toggled = $(false)
-    const broken = $(window.matchMedia('(max-width : 800px)').matches)
+    const active = $(false)
 
     return (
-      <div style={{ display: 'flex', height: '100%' }}>
-      <Sidebar collapsed={collapsed} >
-        <Menu>
-          <SubMenu prefix="🔥" suffix="🔥" icon={<img src={"C:\Users\hongo\Desktop\home.png"} />} label="Charts">
-            <MenuItem icon={<img src={"C:\Users\hongo\Desktop\home.png"} />}> Pie charts</MenuItem>
-            <MenuItem> Line charts</MenuItem>
-            <MenuItem> Bar charts</MenuItem>
-          </SubMenu>
-          <SubMenu label="Maps">
-            <MenuItem> Google maps</MenuItem>
-            <MenuItem> Open street maps</MenuItem>
-          </SubMenu>
-          <SubMenu label="Theme">
-            <MenuItem> Dark</MenuItem>
-            <MenuItem> Light</MenuItem>
-          </SubMenu>
-        </Menu>
-      </Sidebar>
-          <main style={{ padding: 10 }}>
-                 <div>
-                     <button onClick={() => collapsed(!collapsed())}>
-                         Collapse
-                     </button>
-                 </div>
-             </main>
-    </div>
+    //   <div style={{ display: 'flex', height: '100%' }}>
+    //   <Sidebar collapsed={collapsed} >
+    //     <Menu>
+    //       <SubMenu prefix="🔥" suffix="🔥" icon={<img src={"C:\Users\hongo\Desktop\home.png"} />} label="Charts">
+    //         <MenuItem icon={<img src={"C:\Users\hongo\Desktop\home.png"} />}> Pie charts</MenuItem>
+    //         <MenuItem> Line charts</MenuItem>
+    //         <MenuItem> Bar charts</MenuItem>
+    //       </SubMenu>
+    //       <SubMenu label="Maps">
+    //         <MenuItem> Google maps</MenuItem>
+    //         <MenuItem> Open street maps</MenuItem>
+    //       </SubMenu>
+    //       <SubMenu label="Theme">
+    //         <MenuItem> Dark</MenuItem>
+    //         <MenuItem> Light</MenuItem>
+    //       </SubMenu>
+    //     </Menu>
+    //   </Sidebar>
+    //       <main style={{ padding: 10 }}>
+    //              <div>
+    //                  <button onClick={() => collapsed(!collapsed())}>
+    //                      Collapse
+    //                  </button>
+    //                  <div>test </div>
+    //              </div>
+    //          </main>
+    // </div>
 
 
     //   RTL Demo
@@ -71,30 +72,32 @@ const App = () => {
     //       <MenuItem> Documentation</MenuItem>
     //       <MenuItem> Calendar</MenuItem>
     //       <MenuItem> E-commerce</MenuItem>
-    //       <MenuItem> Examples</MenuItem>
+    //       <MenuItem> Examples</MenuItem> 
     //     </Menu>
     //   </Sidebar>
     // </div>
 
       // Toggle background blur and display menu
-      //   <div style={{ display: 'flex', height: '100%', minHeight: '400px'   }}>
-      //   <Sidebar onBackdropClick={() => toggled(false)} toggled={toggled} breakPoint="all" >
-      //     <Menu>
-      //       <MenuItem> Documentation</MenuItem>
-      //       <MenuItem> Calendar</MenuItem>
-      //       <MenuItem> E-commerce</MenuItem>
-      //       <MenuItem> Examples</MenuItem>
-      //     </Menu>
-      //   </Sidebar>
-      //   <main style={{ display: 'flex', padding: 10 }}>
-      //     <div>
-      //       <button className="sb-button" onClick={() => toggled(!toggled())}>
-      //         Toggle
-      //       </button>
-      //     </div>
-      //   </main>
-      // </div>
-
+        <div style={{ display: 'flex', height: '100%', minHeight: '400px'   }}>
+        <Sidebar onBackdropClick={() => toggled(false)} toggled={toggled} breakPoint='xxl' activeWhenCollapsed >
+          <Menu>
+            <MenuItem> Documentation</MenuItem>
+            <MenuItem> Calendar</MenuItem>
+            <MenuItem> E-commerce</MenuItem>
+            <MenuItem> Examples</MenuItem>
+          </Menu>
+        </Sidebar>
+        <main style={{ display: 'flex', padding: 10 }}>
+          <div style={{
+            paddingLeft:()=> $$(toggled) ? "250px": ""
+          }}>
+            <button className="sb-button" onClick={() => toggled(!toggled())}>
+              Toggle
+            </button>
+          </div>
+        </main>
+      </div>
+      
       //Collapsed demo
         // <div style={{ display: 'flex', height: '100%', minHeight: '400px' }}>
         //     <Sidebar collapsed={collapsed} transitionDuration={5000} >

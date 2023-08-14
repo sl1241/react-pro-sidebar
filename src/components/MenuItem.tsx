@@ -7,21 +7,21 @@ import { SidebarContext } from './Sidebar';
 import { $$, useContext, useMemo } from 'voby';
 
 export interface MenuItemProps
-  extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'prefix'> {
   /**
    * The icon to be displayed in the menu item
    */
-  icon?: React.ReactNode;
+  icon?: JSX.Child
 
   /**
    * The prefix to be displayed in the menu item
    */
-  prefix?: React.ReactNode;
+  prefix?: JSX.Child
 
   /**
    * The suffix to be displayed in the menu item
    */
-  suffix?: React.ReactNode;
+  suffix?: JSX.Child
 
   /**
    * If set to true, the menu item will have an active state
@@ -38,47 +38,18 @@ export interface MenuItemProps
   /**
    * The component to be rendered as the menu item button
    */
-  component?: string | React.ReactElement;
+  component?: string | JSX.Child;
 
   /**
-   * Apply styles from the root element
+   * Apply styles from the root element(tailwind)
    */
-  rootStyles?: CSSObject;
+  rootStyles?: ObservableMaybe<string>
 
-  children?: React.ReactNode;
+  children?: JSX.Child;
 }
-
-// interface StyledMenuItemProps extends Pick<MenuItemProps, 'rootStyles' | 'active' | 'disabled'> {
-//   level: number;
-//   menuItemStyles?: CSSObject;
-//   collapsed?: boolean;
-//   rtl?: boolean;
-//   buttonStyles?: CSSObject;
-// }
 
 type MenuItemElement = 'root' | 'button' | 'label' | 'prefix' | 'suffix' | 'icon';
 
-// const StyledMenuItem = styled.li<StyledMenuItemProps>`
-//   width: 100%;
-//   position: relative;
-
-//   ${({ menuItemStyles }) => menuItemStyles};
-
-//   ${({ rootStyles }) => rootStyles};
-
-//   [&_.ps-menu-button]> .${menuClasses.button} {
-//     ${({ level, disabled, active, collapsed, rtl }) =>
-//       menuButtonStyles({
-//         level,
-//         disabled,
-//         active,
-//         collapsed,
-//         rtl,
-//       })};
-
-//     ${({ buttonStyles }) => buttonStyles};
-//   }
-// `;
 
 export const MenuItemFR = (
   {
@@ -98,7 +69,7 @@ export const MenuItemFR = (
   const level = useContext(LevelContext);
   const { collapsed, rtl, transitionDuration } = useContext(SidebarContext);
   const { menuItemStyles } = useMenu();
-  const getMenuItemStyles = (element: MenuItemElement): CSSObject | undefined => {
+  const getMenuItemStyles = (element: MenuItemElement): ObservableMaybe<string> | undefined => {
     if (menuItemStyles) {
       const params = { level, disabled, active, isSubmenu: false };
       const {
@@ -157,8 +128,8 @@ export const MenuItemFR = (
     >
       <MenuButton
         style={{
-          paddingLeft: ()=> rtl ? "20px" : `${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px`,
-          paddingRight: ()=>rtl ? ` ${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px` : "20px"
+          paddingLeft: () => rtl ? "20px" : `${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px`,
+          paddingRight: () => rtl ? ` ${level === 0 ? 20 : ($$(collapsed) ? level : level + 1) * 20}px` : "20px"
         }}
         className={
           [

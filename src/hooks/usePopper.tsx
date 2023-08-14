@@ -4,12 +4,12 @@ import { $$,$, useContext, useEffect } from 'voby';
 
 interface PopperOptions {
   level: number;
-  buttonRef: React.RefObject<HTMLAnchorElement>;
-  contentRef: React.RefObject<HTMLDivElement>;
+  buttonRef: ObservableMaybe<HTMLAnchorElement>;
+  contentRef: ObservableMaybe<HTMLDivElement>;
 }
 
 interface PopperResult {
-  popperInstance?: ObservableMaybe<typeof createPopper>;
+  popperInstance?: ObservableMaybe<ReturnType<typeof createPopper>>
 }
 
 export const usePopper = (options: PopperOptions): PopperResult => {

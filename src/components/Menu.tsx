@@ -9,7 +9,7 @@ export interface MenuItemStylesParams {
   open?: boolean;
 }
 
-export type ElementStyles = CSSObject | ((params: MenuItemStylesParams) => CSSObject | undefined);
+export type ElementStyles = ObservableMaybe<string> | ((params: MenuItemStylesParams) => ObservableMaybe<string> | undefined);
 
 export interface MenuItemStyles {
   root?: ElementStyles;
@@ -51,19 +51,15 @@ export interface MenuContextProps {
   /**
    * Render a custom expand icon for SubMenu components
    */
-  renderExpandIcon?: (params: RenderExpandIconParams) => React.ReactNode;
+  renderExpandIcon?: (params: RenderExpandIconParams) => JSX.Children;
 }
 
-export interface MenuProps extends MenuContextProps, React.MenuHTMLAttributes<HTMLMenuElement> {
-  rootStyles?: CSSObject;
-  children?: React.ReactNode;
+export interface MenuProps extends MenuContextProps, MenuHTMLAttributes<HTMLMenuElement> {
+  rootStyles?: ObservableMaybe<string> // use tailwind classes
+  children?: JSX.Children
 }
 
-// const StyledMenu = styled.nav<Pick<MenuProps, 'rootStyles'>>`
-//   &.${menuClasses.root} {
-//     ${({ rootStyles }) => rootStyles}
-//   }
-// `;
+
 
 export const MenuContext = createContext<MenuContextProps | undefined>(undefined);
 
@@ -80,9 +76,9 @@ const MenuFR = (
     renderExpandIcon,
     ref,
     ...rest
-  } : MenuProps,
+  }: MenuProps,
 ) => {
-  
+
   const providerValue = useMemo(() => ({ transitionDuration, closeOnClick, menuItemStyles, renderExpandIcon }));
   return (
     <MenuContext.Provider value={$$(providerValue)}>
