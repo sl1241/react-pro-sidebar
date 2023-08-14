@@ -230,7 +230,7 @@ export const Sidebar = (
   const broken = useMediaQuery(getBreakpointValue());
   const mounted = $(false)
   const active = activeWhenCollapsed ?? $(true)
-
+  debugger
   const collapsedValue = collapsed ?? mounted()
   const handleBackdropClick = () => {
     onBackdropClick?.();
@@ -288,10 +288,14 @@ export const Sidebar = (
         )}
 
         {useMemo(() => {
-          return !$$(active) && $$(broken) && $$(toggled) && (
+          return $$(active) && $$(broken) && $$(toggled) && (
             <div
               role="button"
               tabIndex={0}
+              style={{
+                left: `${ rtl ? "0px" : `${collapsedValue ? `0px` : `${width}`}` }`,
+                right: `${ rtl ? `${collapsedValue ? `0px` : `${width}`}` : "0px" }`,
+              }}
               aria-label="backdrop"
               onClick={handleBackdropClick}
               onKeyPress={handleBackdropClick}
